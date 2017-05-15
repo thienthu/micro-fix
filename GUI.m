@@ -102,7 +102,12 @@ function startButton_Callback(hObject, eventdata, handles)
 % hObject    handle to startButton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-val=get(handles.startButton,'Value');
+if (strcmp(get(handles.startButton,'String'),'PAUSE'))
+    set(handles.startButton,'String','START');
+elseif (strcmp(get(handles.startButton,'String'),'START'))
+    set(handles.startButton,'String','PAUSE');
+end
+while (strcmp(get(handles.startButton,'String'),'PAUSE'))
 %% change to new folder
 Fs1=100;
 Ts1=1/Fs1;
@@ -110,123 +115,188 @@ Fs2=100;
 Ts2=1/Fs2;
 Fs3=100;
 Ts3=1/Fs3;
-x1=28; % Reach from fromat ofdats PEF, '1' is just the example
-x2=28; % Reach from format of data SPo2, ''
-x3=28; % reach from format of data HR, ''
-if val==1
-    cd ('D:\My Library\Project\Micro\Matlab\matlab\MIMIC II WAVEFORM DATABASE\ASTHMA DATA\s00033\s00033-2559-01-25-12-35');
+x1=16; % Reach from fromat ofdats PEF, '1' is just the example
+x2=16; % Reach from format of data SPo2, ''
+x3=16; % reach from format of data HR, ''
+    cd ('D:\My Library\Project\Micro\Matlab\data demo');
     %%%%%%%% PEF data%%%%%%%%%%%%%%%%%
-    b1=dir('s00033-2559-01-25-12-35_A*'); %% get the current data of spo2
-    b1=b1(end-1); %%% change 1 into lb1
-    a1=b1.name;
-    n1=double(a1);
+    b1=dir('demo-micro-test-*'); %% get the current data of spo2
+    b1=b1(1); %%% change 1 into lb1
+    an1=b1.name;
+    n1=double(an1);
     con1=n1(1:x1);%% constant part
     change1=n1(x1+1:end);
    ind1=change1(find(change1>=48 & change1<=57));
    num1=char(ind1);
    num1=str2num(num1);
-   PEF=load(a1);
-   PEF=PEF.m_II;
+   PEF=readtable(an1);
+   PEF=PEF.PEF;
    %%%%SPO2%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   b2=dir('s00033-2559-01-25-12-35_A*'); %% get the current data of spo2
-    b2=b2(end-1); %%% change 1 into lb2
-    a2=b2.name;
-    n2=double(a2);
-    con2=n1(1:x2);%% constant part
-    change2=n2(x2+1:end);
+   b2=dir('demo-micro-test-*'); %% get the current data of spo2
+   b2=b2(1); %%% change 1 into lb2
+   an2=b2.name;
+   n2=double(an2);
+   con2=n1(1:x2);%% constant part
+   change2=n2(x2+1:end);
    ind2=change2(find(change2>=48 & change2<=57));
    num2=char(ind2);
    num2=str2num(num2);
-   SPO2=load(a2);
-   SPO2=SPO2.m_II; %% call cell of SPO2
+   SPO2=readtable(an2);
+   SPO2=SPO2.SPO2; %% call cell of SPO2
    %%%%%%%%%%%%%%% HR data %%%%%%%%%%%%%%%%%
-   b3=dir('s00033-2559-01-25-12-35_A*'); %% get the current data of spo2
-    b3=b3(end-1); %%% change 1 into lb3
-    a3=b3.name;
-    n3=double(a3);
-    con3=n3(1:x3);%% constant part
-    change3=n3(x3+1:end);
-   ind3=change3(find(change3>=48 & change3<=57));
-   num3=char(ind3);
-   num3=str2num(num3);
-   HR=load(a3);
-   HR=HR.m_II; %% call cell of HR
+  b3=dir('demo-micro-test-*'); %% get the current data of spo2
+  b3=b3(1); %%% change 1 into lb3
+  an3=b3.name;
+  n3=double(an3);
+  con3=n3(1:x3);%% constant part
+  change3=n3(x3+1:end);
+  ind3=change3(find(change3>=48 & change3<=57));
+  num3=char(ind3);
+  num3=str2num(num3);
+  HR=readtable(an3);
+  HR=HR.HR; %% call cell of HR
  %%%%% finish to get the current data of SPo2  
   l1=numel(PEF);   
   l2=numel(SPO2);
   l3=numel(HR);
-  lt1=0;
-  lt2=0;
-  lt3=0;
-    while l1~=0 && l2~=0 && l3~=0
-    num=[num1,num2,num3];
-    t1=Ts1*length(PEF);
-    t2=Ts2*length(PEF);
-    t3=Ts3*length(PEF);
-    lt1=lt1+l1; %% chay thi bo cai nay
-    lt2=lt2+l2; %% chay thi bo cai nay
-    lt3=lt3+l3; %% chay thi bo cai nay
-    axes(handles.PEF_plot);
-    plot(1+lt1:l1+lt1,PEF); %% change in to 1:Fs:t
-    axes(handles.SpO2_plot);
-    plot(1+lt2:l2+lt2,SPO2); %% change in to 1:Fs:t
-    axes(handles.HR_plot);
-    plot(1+lt3:l3+lt3,HR); %% change in to 1:Fs:t
-    for i= 1:l1
-        data1=PEF(i);
-        data2=SPO2(i);
-        data3=HR(i);
-    if data1==0 || data2==0 || data3==0 
-        set(handles.Status,'String','Running');
-        set(handles.YN_results,'String','');
-        set(handles.severity_result,'String','');
-    elseif data1>=33 && data1<=50 && data2 >92 && data3>110
-        set(handles.Status,'String','data');
-        set(handles.YN_results,'String','yes');
-        set(handles.severity_result,'String','moderate asthma');
-    elseif data1 <=33 && data2 <=92 && data3<60
-        set(handles.Status,'String','data');
-        set(handles.YN_results,'String','yes');
-        set(handles.severity_result,'String','severe asthma');
-    elseif data1 >=50 && data1<=75 && data2 >92 && data3<110
-        set(handles.Status,'String','data');
-        set(handles.YN_results,'String','yes');
-        set(handles.severity_result,'String','mild asthma');
+  a1=(1:l1)/Fs1;
+  a2=(1:l2)/Fs2;
+  a3=(1:l3)/Fs3;
+ %%%%% create sound with the time is 1/Fs1;
+%   t=0:1/10e3:1/100; % duration 4
+%   rad=90*pi/180; %angle in rad of sinusoid1
+%   y1=1500*sin(2*pi*150*t+rad); %sinusoid 1
+%   y2=200*sin(2*pi*950*t); %sinusoid 2
+%   y=y1+y2; %sum function
+  ls1=0;
+  ls2=0;
+  ls3=0;
+  dataYN={};
+  dataseverity={};
+  time=[];
+  j=0;
+%%% loop for combine all the segment files
+    %% --loop 2-- %%
+    while l1>=500 && l2>=500 && l3>=500 %% mow text 1
+    i=250;
+    %% -- loop 1--%%
+    while i<=(l1-250) && i<=(l2-250) && i<=(l3-250)
+        j=j+1;
+        data1=PEF((i-250+1):(i+250));
+        data2=SPO2((i-250+1):(i+250));
+        data3=HR((i-250+1):(i+250));
+    if isequal(data1>=33 & data1 <=50,ones(length(data1),1))  && isequal(data2 >92,ones(length(data1),1)) && isequal(data3>110,ones(length(data1),1))
+%         sound(y);
+        p1='data';
+        p2='yes';
+        p3='acute severe asthma';
+    elseif isequal(data1 <=33,ones(length(data1),1)) && isequal(data2 <=92,ones(length(data1),1)) && isequal(data3<60,ones(length(data1),1))
+%         sound(y);
+        p1='data';
+        p2='yes';
+        p3='life threating!!';
+    elseif isequal(data1>=50 & data1<=75,ones(length(data1),1)) && isequal(data2 >92,ones(length(data1),1)) && isequal(data3<110,ones(length(data1),1))
+%         sound(y)
+        p1='data';
+        p2='yes';
+        p3='moderate asthma';
+    elseif isequal(data1 >=75,ones(length(data1),1)) && isequal(data2 >92,ones(length(data1),1)) && isequal(data3>60,ones(length(data1),1)) 
+        p1='data';
+        p2='no';
+        p3='normal';
     else
-        set(handles.Status,'String','data');
-        set(handles.YN_results,'String','no');
-        set(handles.severity_result,'String','normal');
+        p1='connecting...';
+        p2='detecting...';
+        p3='detecting...';
     end
+    set(handles.Status,'String',p1);
+    set(handles.YN_results,'String',p2);
+    set(handles.severity_result,'String',p3);
+    axes(handles.PEF_plot);
+    s1=a1(i-250+1:i+250); % x axis
+    plot(s1,data1);
+    xlim ([min(s1)-1/Fs1, max(s1)]);
+    ylim ([0 100]);
+    axes(handles.SpO2_plot);
+    s2=a2(i-250+1:i+250); % x axis
+    plot(s2,data2);
+    xlim ([min(s2)-1/Fs2, max(s2)])
+    ylim ([0 100]);
+    axes(handles.HR_plot);
+    s3=a3(i-250+1:i+250); % x axis
+    plot(s3,data3);
+    xlim ([min(s3)-1/Fs3, max(s3)]);
+    ylim ([0 150]);
+    i=i+4;
+    drawnow;
+    %% -- save data into text file table --- %%
+    dataYN{j}=p2;
+    dataseverity{j}=p3;
+    time(j)=a1(i);
+    T=table(dataYN,dataseverity, time);
     end
+   %% --end loop 1-- %%
     %%% import new data
      %%%%%load new data PEF%%%%%%%%%%%%%
      num1=num1+1;
      var1=num2str(num1);
-     last1=[con1,var1,'.mat']; %% call the name of current txt file
-     PEF=load(last1);
-     PEF=PEF.m_II;
+     last1=[con1,var1,'.txt']; %% call the name of current txt file
+     PEFn=readtable(last1);
+     PEF=[data1(2:end);PEFn.PEF];
+     ls1=ls1+1000;
+     a1=[];
+     a1=[s1(2:end),(1:length(PEFn.PEF))/Fs1+ls1/Fs1];
      l1=length(PEF);
      %%%%%%load new data SPO2 %%%%%
      num2=num2+1;
      var2=num2str(num2);
-     last2=[con2,var2,'.mat']; %% call the name of current txt file
-     SPO2=load(last2);
-     SPO2=SPO2.m_II; %% call cell of SPO2
+     last2=[con2,var2,'.txt']; %% call the name of current txt file
+     SPO2n=readtable(last2);
+     SPO2=[];
+     SPO2=[data2(2:end);SPO2n.SPO2]; %% call cell of SPO2
+     ls2=ls2+1000;
+     a2=[];
+     a2=[s2(2:end),(1:length(SPO2n.SPO2))/Fs2+ls2/Fs2];
      l2=length(SPO2);
      %%%%%% load new data HR %%%%%%%
      num3=num3+1;
      var3=num2str(num3);
-     last3=[con3,var3,'.mat']; %% call the name of current txt file
-     HR=load(last3);
-     HR=HR.m_II; %% call cell of HR
+     last3=[con3,var3,'.txt']; %% call the name of current txt file
+     HRn=readtable(last3);
+     HR=[];
+     HR=[data3(2:end);HRn.HR]; %% call cell of SPO2
+     ls3=ls3+1000;
+     a3=[];
+     a3=[s3(2:end),(1:length(HRn.HR))/Fs3+ls3/Fs3];
      l3=length(HR);
-     lt1=lt1+l1; %% chay thi bo cai nay
-    lt2=lt2+l2; %% chay thi bo cai nay
-    lt3=lt3+l3; %% chay thi bo cai nay
-    end  
-else 
-     set(handles.Status,'String','stop');
+    end
+    %% -- end loop 2 -- %%
+    %% -- save table to folder result -- %%
 end
+%% -- text save --%%
+% cd ('D:\My Library\Project\Micro\Matlab\results text file');
+%     f=dir('result-data-*');
+% num=0;
+% if length(f)~=0
+%    l=length(f);
+%    so1=fix(l/10);
+%    so2=mod(l,10);
+%    if so1 ~=0
+%    select=length(1:so1)+length(0:so2)+(so1-1)*10;
+%    else
+%        select=l;
+%    end
+%    an=f(select); % the newest file name
+%    an=an.name;
+%    n=double(an); % change to ASCII
+%    ind=n(find(n>=48 & n<=57)); % find number in n array
+%    num=char(ind);
+%    num=str2num(num);
+% end
+% num=num+1;
+% namef=['result-data-',num2str(num),'.txt'];
+% writetable(T,namef);
+
         
 function Status_Callback(hObject, eventdata, handles)
 % hObject    handle to Status (see GCBO)
