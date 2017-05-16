@@ -59,8 +59,8 @@ handles.output = hObject;
 % Update handles structure
 guidata(hObject, handles);
 cd('D:\Project Micro\test\thu');
-imshow('logoIU.png','Parent',handles.logoIU);
-imshow('logoBME.png','Parent',handles.logoBME);
+imshow('logoIU.jpg','Parent',handles.logoIU);
+imshow('logoBME.jpg','Parent',handles.logoBME);
  
 %Set image of close button
 [a,map]=imread('close.jpg');
@@ -134,7 +134,9 @@ if (strcmp(get(handles.startButton,'String'),'PAUSE'))
 elseif (strcmp(get(handles.startButton,'String'),'START'))
     set(handles.startButton,'String','PAUSE');
 end
-while (strcmp(get(handles.startButton,'String'),'PAUSE'))
+r=1;
+while r==1 
+if(get(handles.startButton,'Value')==1)
 %% change to new folder
 Fs1=100;
 Ts1=1/Fs1;
@@ -299,14 +301,19 @@ x3=16; % reach from format of data HR, ''
     end
     %% -- end loop 2 -- %%
     %% -- save table to folder result -- %%
+else
+   i=i;
+   num=num;
+   
 end
-while (strcmp(get(handles.startButton,'String'),'START'))
-    i=i;
-    num=num;
+end
+% while (strcmp(get(handles.startButton,'String'),'START'))
+%     i=i;
+%     num=num;
 %     if strcmp(get(handles.startButton,'String'),'PAUSE')
-%  
+%         break
 %     end
-end
+% end
 %% -- text save --%%
 % cd ('D:\My Library\Project\Micro\Matlab\results text file');
 %     f=dir('result-data-*');
